@@ -104,7 +104,7 @@ zinit load denilsonsa/prettyping
 
 # EZA (Improved LS with formatting)
 export EZA_COLORS="di=36;1:uu=2;33:da=94"
-zinit ice wait="2" lucid from="gh-r" as="program" mv="bin/eza* -> eza" atload="alias ls='eza -s type'"
+zinit ice wait="2" lucid from="gh-r" as="program" mv="bin/eza* -> eza" atload="alias ls='eza --git  --classify --group-directories-first --time-style=long-iso --group --color-scale'"
 zinit light eza-community/eza
 
 # Delta
