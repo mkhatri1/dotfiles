@@ -3,8 +3,11 @@ zmodload zsh/zprof
 
 export TERM=screen-256color
 export SHELL="/bin/zsh"
+export EDITOR="nvim"
 
 zstyle ":completion:*" matcher-list 'm:{a-zA-Z}={A-Za-z}'
+# pasting with tabs doesn't perform completion
+zstyle ':completion:*' insert-tab pending
 
 # Enable Powerlevel10k instant prompt. Should stay close to the top of ~/.zshrc.
 # Initialization code that may require console input (password prompts, [y/n]
@@ -157,6 +160,9 @@ zinit ice atclone'PYENV_ROOT="$PWD" ./libexec/pyenv init - > zpyenv.zsh' \
     as'command' pick'bin/pyenv' src"zpyenv.zsh" nocompile'!'
 zinit light pyenv/pyenv
 
+# TMUX
+zinit lucid wait=2 id-as="tmux" as="program" configure'--enable-utf8proc' as"none" depth"1" atclone="brew install tmux" atpull"brew upgrade tmux" atdelete"brew uninstall tmux" for "mkhatri1/null"
+
 ## Complete Initialization
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
 typeset -g POWERLEVEL9K_INSTANT_PROMPT=quiet
@@ -165,7 +171,7 @@ typeset -g POWERLEVEL9K_INSTANT_PROMPT=quiet
 SAVEHIST=1000000
 HISTSIZE=1000000
 
-# History command configuration
+## ZSH opt configuration
 setopt BANG_HIST                 # Treat the '!' character specially during expansion.
 setopt EXTENDED_HISTORY          # Write the history file in the ":start:elapsed;command" format.
 setopt INC_APPEND_HISTORY        # Write to the history file immediately, not when the shell exits.
@@ -183,6 +189,14 @@ setopt COMPLETE_IN_WORD
 setopt LIST_AMBIGUOUS
 setopt AUTOMENU
 setopt HASH_LIST_ALL
+# Better history
+# Credits to https://coderwall.com/p/jpj_6q/zsh-better-history-searching-with-arrow-keys
+autoload -U up-line-or-beginning-search
+autoload -U down-line-or-beginning-search
+zle -N up-line-or-beginning-search
+zle -N down-line-or-beginning-search
+bindkey "^[[A" up-line-or-beginning-search # Up
+bindkey "^[[B" down-line-or-beginning-search # Down
 
 bindkey "\ef" forward-word
 bindkey "\eb" backward-word

@@ -3,6 +3,7 @@ alias n=nvim
 alias vi=nvim
 alias pm=pnpm
 alias tf="tofu"
+alias ch="chezmoi"
 
 alias zp="cd ~/.config/zsh"
 alias vc="vim ~/.vimrc"
