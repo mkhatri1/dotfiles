@@ -1,0 +1,14 @@
+## DO NOT PUT SENSITIVE DATA IN THIS CONFIG.
+## Include SEPARATE FILES
+
+Host github.com
+  AddKeysToAgent yes
+  UseKeychain yes
+  IdentityFile ~/.ssh/id_ed25519
+
+Include config.d/work
+
+host i-* mi-*
+	IdentityFile ~/.ssh/id_ed25519
+	ProxyCommand ~/.ssh/aws-ssm-ssh-proxy-command.sh %h %r %p ~/.ssh/id_ed25519.pub
+	StrictHostKeyChecking no
