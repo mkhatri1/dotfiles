@@ -1,0 +1,28 @@
+font-family = "Hack, MesloLGS NF"
+font-size = 14
+font-feature = "-calt"
+font-feature = "-liga"
+font-feature = "-dlig"
+shell-integration-features="cursor"
+
+mouse-scroll-multiplier = 2
+
+background = 101010
+foreground = fefefe
+
+window-padding-balance = true
+window-save-state = always
+macos-titlebar-style = transparent
+window-colorspace = "display-p3"
+
+keybind = super+\=new_split:right 
+
+unfocused-split-opacity = 0.7
+unfocused-split-fill = 707070
+
+shell-integration = zsh
+
+theme = Nocturnal Winter
+palette = 6=#48d1cc  
+
+linux-cgroup = always

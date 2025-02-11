@@ -7,10 +7,10 @@ alias ch="chezmoi"
 
 alias zp="cd ~/.config/zsh"
 alias vc="vim ~/.vimrc"
-alias wp="cd ~/workspace"
 alias pkey="cat ~/.ssh/id_ed25519.pub | pbcopy"
 alias tconf="cd ~/.config/tmux"
 alias vp="cd ~/.config/nvim/lua/plugins"
+alias wp="cd ~/workspace"
 
 # `eza` = more configurable `ls`
 alias ls="eza -s type"

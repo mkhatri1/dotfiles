@@ -26,7 +26,7 @@ require("lazy").setup({
   install = { 
 	  colorscheme = { "habamax" },
   },
-  concurrency = 3,
+  concurrency = 4,
     defaults = {
         lazy = true
     },
@@ -34,4 +34,3 @@ require("lazy").setup({
   checker = { enabled = false },
 })
 
-vim.cmd("colorscheme onedark_vivid")

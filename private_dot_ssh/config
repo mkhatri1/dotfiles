@@ -6,9 +6,32 @@ Host github.com
   UseKeychain yes
   IdentityFile ~/.ssh/id_ed25519
 
-Include config.d/work
+  #Include config.d/*
+
+Host 10.16.7.192
+	HostName 10.16.7.192
+	User ec2-user
+	Port 22
+	IdentityFile ~/.ssh/keys/muhammad-internal-sandbox.pem
+	AddKeysToAgent yes
+	ControlMaster auto
+	ControlPath ~/.ssh/controls/control-%h_%p_%r
+	ControlPersist yes
+	ServerAliveInterval 10
+
+Host 10.16.6.135
+	HostName 10.16.6.135
+	User ec2-user
+	Port 22
+	IdentityFile ~/.ssh/keys/muhammad-internal-sandbox.pem
+	AddKeysToAgent yes
+	ControlMaster auto
+	ControlPath ~/.ssh/controls/control-%h_%p_%r
+	ControlPersist yes
+	ServerAliveInterval 10
 
 host i-* mi-*
+    AddKeysToAgent yes
 	IdentityFile ~/.ssh/id_ed25519
 	ProxyCommand ~/.ssh/aws-ssm-ssh-proxy-command.sh %h %r %p ~/.ssh/id_ed25519.pub
 	StrictHostKeyChecking no

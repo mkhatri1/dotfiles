@@ -1,1 +1,8 @@
 source ~/.zsh/_aggregator.zsh
+
+# bun completions
+[ -s "/Users/mkhatri/.bun/_bun" ] && source "/Users/mkhatri/.bun/_bun"
+
+# bun
+export BUN_INSTALL="$HOME/.bun"
+export PATH="$BUN_INSTALL/bin:$PATH"

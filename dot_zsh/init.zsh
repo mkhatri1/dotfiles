@@ -1,14 +1,18 @@
 # Init profiling
 zmodload zsh/zprof
 
-export TERM=screen-256color
+export TERM=xterm-256color
 export SHELL="/bin/zsh"
 export EDITOR="nvim"
 
+zmodload  zsh/complist
 zstyle ":completion:*" matcher-list 'm:{a-zA-Z}={A-Za-z}'
 # pasting with tabs doesn't perform completion
 zstyle ':completion:*' insert-tab pending
 
+if [ -n "${GHOSTTY_RESOURCES_DIR}" ]; then
+    builtin source "${GHOSTTY_RESOURCES_DIR}/shell-integration/zsh/ghostty-integration"
+fi
 # Enable Powerlevel10k instant prompt. Should stay close to the top of ~/.zshrc.
 # Initialization code that may require console input (password prompts, [y/n]
 # confirmations, etc.) must go above this block; everything else may go below.
@@ -56,8 +60,8 @@ else
   export SHORT_HOST="${HOST/.*/}"
 fi
 
-test -e "${HOME}/.iterm2_shell_integration.zsh" && source "${HOME}/.iterm2_shell_integration.zsh"
-export ITERM_ENABLE_SHELL_INTEGRATION_WITH_TMUX=YES
+#test -e "${HOME}/.iterm2_shell_integration.zsh" && source "${HOME}/.iterm2_shell_integration.zsh"
+#export ITERM_ENABLE_SHELL_INTEGRATION_WITH_TMUX=YES
 
 export GPG_TTY=$(tty)
 export PATH="$PATH:/Users/mkhatri/.local/bin"
@@ -82,6 +86,10 @@ zinit light tree-sitter/tree-sitter
 # Syntax Highlighting
 zinit ice wait"0c" lucid atinit="zicompinit; zicdreplay" src"zsh-syntax-highlighting.zsh"
 zinit light zsh-users/zsh-syntax-highlighting
+
+# Python LSP
+zinit ice wait=3 lucid as="program" id-as="pylsp" nocompile nocompletions atclone="brew install -f python-lsp-server" atpull="brew upgrade python-lsp-server" atdelete="brew uninstall python-lsp-server"
+zinit light mkhatri1/null
 
 ## UTILITY PROGRAMS
 
@@ -130,6 +138,18 @@ zinit light jesseduffield/lazydocker
 # ZSH Integration TMUX
 zinit ice wait lucid depth"1"
 zinit snippet https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/refs/heads/master/plugins/tmux/tmux.plugin.zsh
+
+# HTOP
+zinit ice wait=3 lucid as="program" id-as="htop" nocompile nocompletions atclone="brew install -f htop" atpull="brew upgrade htop" atdelete="brew uninstall htop" 
+zinit light mkhatri1/null
+
+# git-lfs
+zinit ice wait=3 lucid as="program" id-as="git-lfs" nocompile nocompletions atclone="brew install -f git-lfs" atpull="brew upgrade git-lfs" atdelete="brew uninstall git-lfs" 
+zinit light mkhatri1/null
+
+# LazyGit
+zinit ice wait="2" lucid from="gh-r" as="program" mv="lazygit* -> lazygit" atload="alias lg='lazygit'" bpick="*Darwin_arm64*" pick="lazygit/lazygit"
+zinit light jesseduffield/lazygit
 
 ## CORE PROGRAMS
 
@@ -206,3 +226,4 @@ bindkey "^[d" kill-word
 bindkey "^[^H" backward-kill-word
 bindkey "^[^?" backward-kill-word
 
+_evalcache pulumi gen-completion zsh

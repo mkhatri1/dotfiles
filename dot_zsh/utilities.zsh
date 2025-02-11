@@ -9,3 +9,8 @@ chpwd() {
   # ls inside folder after cd
   # eza --git --icons --classify --group-directories-first --time-style=long-iso --group --color-scale
 }
+
+
+vimBindingsHelp() {
+    echo "Device Inventory List To Query::: %s/\(.*\S\)/('\1', '10', '1'), \n"
+}
