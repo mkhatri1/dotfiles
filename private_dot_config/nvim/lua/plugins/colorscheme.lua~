@@ -1,4 +1,0 @@
-return {
-    "GustavoPrietoP/doom-themes.nvim",
-    priority = 1000, -- Ensure it loads first
-}
