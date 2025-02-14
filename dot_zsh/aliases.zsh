@@ -5,10 +5,10 @@ alias pm=pnpm
 alias tf="tofu"
 alias ch="chezmoi"
 
-alias zp="cd ~/.config/zsh"
+alias zp="cd ~/.zsh"
 alias vc="vim ~/.vimrc"
 alias pkey="cat ~/.ssh/id_ed25519.pub | pbcopy"
-alias tconf="cd ~/.config/tmux"
+alias tconf="tmuxconf"
 alias vp="cd ~/.config/nvim/lua/plugins"
 alias wp="cd ~/workspace"
 

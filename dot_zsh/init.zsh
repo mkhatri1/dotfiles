@@ -5,7 +5,7 @@ export TERM=xterm-256color
 export SHELL="/bin/zsh"
 export EDITOR="nvim"
 
-zmodload  zsh/complist
+zmodload -i zsh/complist
 zstyle ":completion:*" matcher-list 'm:{a-zA-Z}={A-Za-z}'
 # pasting with tabs doesn't perform completion
 zstyle ':completion:*' insert-tab pending
@@ -39,6 +39,8 @@ if [[ ! -f $HOME/.local/share/zinit/zinit.git/zinit.zsh ]]; then
 fi
 
 source "$HOME/.local/share/zinit/zinit.git/zinit.zsh"
+autoload -Uz _zinit
+(( ${+_comps} )) && _comps[zinit]=_zinit
 # END Zinit install block
 
 # Load a few important annexes, without Turbo
@@ -87,10 +89,6 @@ zinit light tree-sitter/tree-sitter
 zinit ice wait"0c" lucid atinit="zicompinit; zicdreplay" src"zsh-syntax-highlighting.zsh"
 zinit light zsh-users/zsh-syntax-highlighting
 
-# Python LSP
-zinit ice wait=3 lucid as="program" id-as="pylsp" nocompile nocompletions atclone="brew install -f python-lsp-server" atpull="brew upgrade python-lsp-server" atdelete="brew uninstall python-lsp-server"
-zinit light mkhatri1/null
-
 ## UTILITY PROGRAMS
 
 # FZF
@@ -105,6 +103,15 @@ zinit light junegunn/fzf
 # FZF-TAB
 zinit ice wait="1" lucid
 zinit light Aloxaf/fzf-tab
+zstyle ':completion:*:git-checkout:*' sort false
+# set descriptions format to enable group support
+zstyle ':completion:*:descriptions' format '[%d]'
+# set list-colors to enable filename colorizing
+zstyle ':completion:*' list-colors ${(s.:.)LS_COLORS}
+# preview directory's content with exa when completing cd
+zstyle ':fzf-tab:complete:cd:*' fzf-preview 'exa -1 --color=always $realpath'
+# switch group using `,` and `.`
+zstyle ':fzf-tab:*' switch-group ',' '.'
 
 # PRETTYPING
 zinit ice lucid wait="" as="program" pick="prettyping" atload="alias ping=prettyping"
@@ -139,17 +146,12 @@ zinit light jesseduffield/lazydocker
 zinit ice wait lucid depth"1"
 zinit snippet https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/refs/heads/master/plugins/tmux/tmux.plugin.zsh
 
-# HTOP
-zinit ice wait=3 lucid as="program" id-as="htop" nocompile nocompletions atclone="brew install -f htop" atpull="brew upgrade htop" atdelete="brew uninstall htop" 
-zinit light mkhatri1/null
-
-# git-lfs
-zinit ice wait=3 lucid as="program" id-as="git-lfs" nocompile nocompletions atclone="brew install -f git-lfs" atpull="brew upgrade git-lfs" atdelete="brew uninstall git-lfs" 
-zinit light mkhatri1/null
-
 # LazyGit
-zinit ice wait="2" lucid from="gh-r" as="program" mv="lazygit* -> lazygit" atload="alias lg='lazygit'" bpick="*Darwin_arm64*" pick="lazygit/lazygit"
+zinit ice wait="2" lucid from="gh-r" as="program" sbin="**/lazygit" atload="alias lg='lazygit'" 
 zinit light jesseduffield/lazygit
+
+# Glow - MD Reader
+zinit wait lucid for from="gh-r" sbin="**/glow" charmbracelet/glow
 
 ## CORE PROGRAMS
 
@@ -181,7 +183,11 @@ zinit ice atclone'PYENV_ROOT="$PWD" ./libexec/pyenv init - > zpyenv.zsh' \
 zinit light pyenv/pyenv
 
 # TMUX
-zinit lucid wait=2 id-as="tmux" as="program" configure'--enable-utf8proc' as"none" depth"1" atclone="brew install tmux" atpull"brew upgrade tmux" atdelete"brew uninstall tmux" for "mkhatri1/null"
+zinit id-as for \
+    cmake \
+  @thewtex/tmux-mem-cpu-load \
+    configure'--disable-utf8proc' make \
+  @tmux/tmux
 
 ## Complete Initialization
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
