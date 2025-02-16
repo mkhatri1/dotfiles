@@ -13,7 +13,14 @@ return {
                         highlight = "directory",
                         separator = true
                     },
+                },
+                indicator = {
+                    style = "underline"
+                },
+                hover = {
+                    enabled = true,
                 }
+                -- mode = "tabs"
             }
         })
         vim.opt.termguicolors = true
