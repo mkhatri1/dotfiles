@@ -66,7 +66,7 @@ fi
 #export ITERM_ENABLE_SHELL_INTEGRATION_WITH_TMUX=YES
 
 export GPG_TTY=$(tty)
-export PATH="$PATH:/Users/mkhatri/.local/bin"
+export PATH="$PATH:$HOME/.local/bin"
 
 zinit ice depth=1
 zinit load mroth/evalcache
