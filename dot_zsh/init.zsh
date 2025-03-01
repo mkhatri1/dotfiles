@@ -20,14 +20,44 @@ if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]
   source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
 fi
 
-# Initialize completion functionality early so zinit can backtrack later
-autoload -Uz +X compinit bashcompinit
+autoload -Uz +X bashcompinit
 bashcompinit
-if [ $(date +'%j') != $(stat -f '%Sm' -t '%j' ~/.zcompdump) ]; then
-  compinit
-else
-  compinit -C
-fi
+# Initialize completion functionality early so zinit can backtrack later
+() {
+	setopt local_options
+	setopt extendedglob
+
+	local zcd=${1}
+	local zcomp_hours=${2:-24} # how often to regenerate the file
+	local lock_timeout=${2:-1} # change this if compinit normally takes longer to run
+	local lockfile=${zcd}.lock
+
+	if [ -f ${lockfile} ]; then 
+		if [[ -f ${lockfile}(#qN.mm+${lock_timeout}) ]]; then
+			(
+				echo "${lockfile} has been held by $(< ${lockfile}) for longer than ${lock_timeout} minute(s)."
+				echo "This may indicate a problem with compinit"
+			) >&2 
+		fi
+		# Exit if there's a lockfile; another process is handling things
+		return
+	else
+		# Create the lockfile with this shell's PID for debugging
+		echo $$ > ${lockfile}
+		# Ensure the lockfile is removed
+		trap "rm -f ${lockfile}" EXIT
+	fi
+
+	autoload -Uz compinit
+
+	if [[ -n ${zcd}(#qN.mh+${zcomp_hours}) ]]; then
+		# The file is old and needs to be regenerated
+		compinit
+	else
+		# The file is either new or does not exist. Either way, -C will handle it correctly
+		compinit -C
+	fi
+} ${ZDOTDIR:-$HOME}/.zcompdump 
 #
 ### Added by Zinit's installer
 if [[ ! -f $HOME/.local/share/zinit/zinit.git/zinit.zsh ]]; then
@@ -198,6 +228,7 @@ SAVEHIST=1000000
 HISTSIZE=1000000
 
 ## ZSH opt configuration
+HISTFILE=~/.zsh_history
 setopt BANG_HIST                 # Treat the '!' character specially during expansion.
 setopt EXTENDED_HISTORY          # Write the history file in the ":start:elapsed;command" format.
 setopt INC_APPEND_HISTORY        # Write to the history file immediately, not when the shell exits.

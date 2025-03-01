@@ -2,9 +2,8 @@
 ## Include SEPARATE FILES
 
 Host github.com
-  AddKeysToAgent yes
-  UseKeychain yes
-  IdentityFile ~/.ssh/id_ed25519
+    IdentityAgent ~/.1password/agent.sock
+
 
   #Include config.d/*
 
