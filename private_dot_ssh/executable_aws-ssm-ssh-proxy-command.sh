@@ -1,5 +1,5 @@
 #!/usr/bin/env sh
-set -eu
+set -e
 
 ################################################################################
 #
@@ -7,16 +7,18 @@ set -eu
 #
 ################################################################################
 
-instance_id="$1"
+instance_id="${1}"
 ssh_user="$2"
 ssh_port="$3"
 ssh_public_key_path="$4"
 
-REGION_SEPARATOR='--'
-if echo "$instance_id" | grep -q -e "${REGION_SEPARATOR}" 
-then
-  export AWS_DEFAULT_REGION="${instance_id##*"${REGION_SEPARATOR}"}"
-  instance_id="${instance_id%%"$REGION_SEPARATOR"*}"
+arr=(${instance_id//--/ })
+
+instance_id=${arr[0]}
+export AWS_DEFAULT_REGION="${arr[1]}"
+
+if [[ ! -z ${arr[2]} ]]; then
+    export AWS_PROFILE="${arr[2]:-$AWS_PROFILE}"
 fi
 
 >/dev/stderr echo "Add public key ${ssh_public_key_path} for ${ssh_user} at instance ${instance_id} for 10 seconds"
