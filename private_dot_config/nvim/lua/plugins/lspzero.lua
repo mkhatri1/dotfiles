@@ -62,6 +62,7 @@ return {
         event = { 'BufReadPre', 'BufNewFile' },
         dependencies = {
             { 'hrsh7th/cmp-nvim-lsp' },
+            { "AstroNvim/astrolsp",               opts = {} },
             -- { "ms-jpq/coq_nvim",                  branch = "coq" },
             -- { "ms-jpq/coq.artifacts",             branch = "artifacts" },
             { 'williamboman/mason.nvim' },
@@ -137,6 +138,9 @@ return {
                         require("lspconfig").bashls.setup({
                             filetypes = { "sh", "zsh", "bash" }
                         })
+                    end,
+                    astrolsp = function(server)
+                        require('astrolsp').lsp_setup(server)
                     end
                 }
             })
@@ -160,5 +164,23 @@ return {
         version = "v2.*", -- Replace <CurrentMajor> by the latest released major (first number of latest release)
         -- install jsregexp (optional!).
         build = "make install_jsregexp"
+    },
+    {
+        'linux-cultist/venv-selector.nvim',
+        dependencies = { 'neovim/nvim-lspconfig', 'nvim-telescope/telescope.nvim', 'mfussenegger/nvim-dap-python' },
+        config = function()
+            require('venv-selector').setup {
+                -- Your options go here
+                -- name = "venv",
+                -- auto_refresh = false
+            }
+        end,
+        event = 'VeryLazy', -- Optional: needed only if you want to type `:VenvSelect` without a keymapping
+        keys = {
+            -- Keymap to open VenvSelector to pick a venv.
+            { '<leader>vs', '<cmd>VenvSelect<cr>' },
+            -- Keymap to retrieve the venv from a cache (the one previously used for the same project directory).
+            { '<leader>vc', '<cmd>VenvSelectCached<cr>' },
+        },
     }
 }

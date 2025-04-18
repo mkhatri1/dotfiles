@@ -4,6 +4,8 @@ zmodload zsh/zprof
 export TERM=xterm-256color
 export SHELL="/bin/zsh"
 export EDITOR="nvim"
+export VISUAL="nvim"
+export XDG_CONFIG_HOME="$HOME/.config"
 
 zmodload -i zsh/complist
 zstyle ":completion:*" matcher-list 'm:{a-zA-Z}={A-Za-z}'
@@ -20,44 +22,14 @@ if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]
   source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
 fi
 
-autoload -Uz +X bashcompinit
-bashcompinit
 # Initialize completion functionality early so zinit can backtrack later
-() {
-	setopt local_options
-	setopt extendedglob
-
-	local zcd=${1}
-	local zcomp_hours=${2:-24} # how often to regenerate the file
-	local lock_timeout=${2:-1} # change this if compinit normally takes longer to run
-	local lockfile=${zcd}.lock
-
-	if [ -f ${lockfile} ]; then 
-		if [[ -f ${lockfile}(#qN.mm+${lock_timeout}) ]]; then
-			(
-				echo "${lockfile} has been held by $(< ${lockfile}) for longer than ${lock_timeout} minute(s)."
-				echo "This may indicate a problem with compinit"
-			) >&2 
-		fi
-		# Exit if there's a lockfile; another process is handling things
-		return
-	else
-		# Create the lockfile with this shell's PID for debugging
-		echo $$ > ${lockfile}
-		# Ensure the lockfile is removed
-		trap "rm -f ${lockfile}" EXIT
-	fi
-
-	autoload -Uz compinit
-
-	if [[ -n ${zcd}(#qN.mh+${zcomp_hours}) ]]; then
-		# The file is old and needs to be regenerated
-		compinit
-	else
-		# The file is either new or does not exist. Either way, -C will handle it correctly
-		compinit -C
-	fi
-} ${ZDOTDIR:-$HOME}/.zcompdump 
+autoload -Uz +X compinit bashcompinit
+bashcompinit
+if [ $(date +'%j') != $(stat -f '%Sm' -t '%j' ~/.zcompdump) ]; then
+  compinit
+else
+  compinit -C
+fi
 #
 ### Added by Zinit's installer
 if [[ ! -f $HOME/.local/share/zinit/zinit.git/zinit.zsh ]]; then
@@ -172,6 +144,10 @@ zinit light @jqlang/jq
 zinit ice lucid wait as="program" from="gh-r" mv="lazydocker* -> lazydocker" atload="alias ld='lazydocker'"
 zinit light jesseduffield/lazydocker
 
+# FD - Better `find`
+zinit ice lucid wait as="program" from="gh-r" pick="**/fd" atload="alias find='fd'" bpick="*aarch64-apple-darwin*"
+zinit light sharkdp/fd
+
 # ZSH Integration TMUX
 zinit ice wait lucid depth"1"
 zinit snippet https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/refs/heads/master/plugins/tmux/tmux.plugin.zsh
@@ -228,7 +204,6 @@ SAVEHIST=1000000
 HISTSIZE=1000000
 
 ## ZSH opt configuration
-HISTFILE=~/.zsh_history
 setopt BANG_HIST                 # Treat the '!' character specially during expansion.
 setopt EXTENDED_HISTORY          # Write the history file in the ":start:elapsed;command" format.
 setopt INC_APPEND_HISTORY        # Write to the history file immediately, not when the shell exits.

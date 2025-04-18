@@ -2,10 +2,17 @@
 ## Include SEPARATE FILES
 
 Host github.com
-    IdentityAgent ~/.1password/agent.sock
+  AddKeysToAgent yes
+  UseKeychain yes
+  IdentityFile ~/.ssh/id_ed25519
 
+Host rdsprod-i-*
+    AddKeysToAgent yes
+    IdentityFile ~/.ssh/id_ed25519
+	ProxyCommand sh -c "REALHOST=$(echo '%h' | cut -c8-) echo $REALHOST; echo '%h'; aws --profile SleepImageProduction:AWSPowerUserAccess ssm start-session --target %h --document-name AWS-StartSSHSession --parameters 'portNumber=%p'"
+	StrictHostKeyChecking no
 
-  #Include config.d/*
+    # Include config.d/*
 
 Host 10.16.7.192
 	HostName 10.16.7.192
