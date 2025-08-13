@@ -6,6 +6,8 @@ export SHELL="/bin/zsh"
 export EDITOR="nvim"
 export VISUAL="nvim"
 export XDG_CONFIG_HOME="$HOME/.config"
+export WORDCHARS=${WORDCHARS/\/}
+export WORDCHARS=${WORDCHARS/-}
 
 zmodload -i zsh/complist
 zstyle ":completion:*" matcher-list 'm:{a-zA-Z}={A-Za-z}'
@@ -67,8 +69,8 @@ fi
 #test -e "${HOME}/.iterm2_shell_integration.zsh" && source "${HOME}/.iterm2_shell_integration.zsh"
 #export ITERM_ENABLE_SHELL_INTEGRATION_WITH_TMUX=YES
 
-export GPG_TTY=$(tty)
 export PATH="$PATH:$HOME/.local/bin"
+export QEMU_SYSTEM_X86_64="qemu-system-x86_64 -cpu Haswell-v4"
 
 zinit ice depth=1
 zinit load mroth/evalcache
@@ -239,3 +241,5 @@ bindkey "^[^H" backward-kill-word
 bindkey "^[^?" backward-kill-word
 
 _evalcache pulumi gen-completion zsh
+_evalcache op completion zsh
+

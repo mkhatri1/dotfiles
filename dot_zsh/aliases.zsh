@@ -15,7 +15,7 @@ alias wp="cd ~/workspace"
 # `eza` = more configurable `ls`
 alias ls="eza -s type"
 # config to make scp transfers faster
-alias scpf="scp -p -C -o 'CompressionLevel 9' -o 'IPQoS throughput' -c aes128-cbc"
+alias scpf="scp -p -C -o 'CompressionLevel 9' -o 'IPQoS throughput' -c aes128-ctr"
 
 
 alias thelp="echo 'Alias	Command	Description
