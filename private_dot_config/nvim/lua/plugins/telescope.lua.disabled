@@ -1,0 +1,42 @@
+return {
+    "nvim-telescope/telescope.nvim",
+    tag = "0.1.x",
+    opts = { extensions_list = { "fzf" } },
+    dependencies = {
+        "nvim-lua/plenary.nvim",
+        'jonarrien/telescope-cmdline.nvim',
+        { 'nvim-telescope/telescope-fzf-native.nvim', build = "make" },
+    },
+    cmd = { "Telescope", "Tel" },
+    keys = { "<leader>f" },
+    config = function(_, opts)
+        local telescope = require("telescope")
+
+        opts.extensions = {
+            fzf = {
+                fuzzy = true,
+                override_generic_sorter = true,
+                override_file_sorter = true,
+                case_mode = "smart_case"
+            }
+        }
+
+        telescope.setup(opts)
+        telescope.load_extension('cmdline')
+        telescope.load_extension('fzf')
+
+        -- set keymaps
+        local keymap = vim.keymap
+        local builtin = require('telescope.builtin')
+
+        keymap.set("n", "<leader>ff", builtin.find_files, { desc = "Fuzzy find files in cwd" })
+        keymap.set("n", "<leader>fg", builtin.live_grep, { desc = "Fuzzy find recent files" })
+        keymap.set("n", "<leader>fb", builtin.buffers, { desc = "Find string in cwd" })
+        keymap.set("n", "<leader>fr", builtin.resume, { desc = "Re-open last telescope instance" })
+        keymap.set("n", "<leader>fh", builtin.help_tags, { desc = "Help with tags" })
+        -- keymap.set("n", "<leader>fs", "<cmd>Telescope git_status<cr>", { desc = "Find string under cursor in cwd" })
+        -- keymap.set("n", "<leader>fc", "<cmd>Telescope git commits<cr>", { desc = "Find todos" })
+
+        keymap.set("n", "Q", "<cmd>Telescope cmdline<cr>")
+    end,
+}
