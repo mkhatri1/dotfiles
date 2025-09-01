@@ -5,7 +5,6 @@ vim.g.maplocalleader = ";"
 
 local global = vim.g
 local o = vim.opt
-local filetype = vim.filetype
 
 vim.opt.number = true
 vim.opt.syntax = "on"
@@ -41,8 +40,6 @@ o.wrap = false
 o.backspace = { "start", "eol", "indent" }
 o.titlestring = 'Neovim: %{expand(\"%:p\")} [%{mode()}]'
 
-filetype.add({ extension = { zcustom = 'zsh' } })
-
 local function map (mode, lhs, rhs)
     vim.keymap.set(mode, lhs, rhs, { silent = true })
 end
@@ -50,10 +47,6 @@ end
 local function mapn (mode, lhs, rhs)
     vim.keymap.set(mode, lhs, rhs, { silent = true, noremap = true })
 end
-
--- NeoTree
-map("n", "<Leader>e", "<CMD>Neotree toggle<CR>")
-map("n", "<Leader>r", "<CMD>Neotree focus<CR>")
 
 map("n", "<leader>a", function() print "hi" end)
 
