@@ -8,6 +8,7 @@ export VISUAL="nvim"
 export XDG_CONFIG_HOME="$HOME/.config"
 export WORDCHARS=${WORDCHARS/\/}
 export WORDCHARS=${WORDCHARS/-}
+export WORDCHARS=${WORDCHARS/=}
 
 zmodload -i zsh/complist
 zstyle ":completion:*" matcher-list 'm:{a-zA-Z}={A-Za-z}'
