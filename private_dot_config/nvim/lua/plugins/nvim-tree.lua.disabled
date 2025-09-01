@@ -1,0 +1,82 @@
+return {
+    'nvim-tree/nvim-tree.lua',
+    cmd = "Nvimtree",
+    version = "*",
+    lazy = false,
+    depdendencies = {
+        "nvim-tree/nvim-web-devicons"
+    },
+    keys = {
+        { "<leader>e", "<CMD>NvimTreeToggle<CR>" },
+        { "<leader>r", "<CMD>NvimTreeFocus<CR>" },
+    },
+    opts = {
+        hijack_cursor = true,
+        hijack_directories = {
+            enable = true,
+        },
+        git = {
+            enable = true,
+        },
+        diagnostics = {
+            enable = true,
+            show_on_dirs = true,
+        },
+        modified = {
+            enable = true,
+        },
+        filters = {
+            git_ignored = false, -- show ignored files
+        },
+        renderer = {
+            decorators = {
+                "Git",
+                "Open",
+                "Hidden",
+                "Modified",
+                "Bookmark",
+                "Diagnostics",
+                "Copied",
+                "Cut",
+            },
+            highlight_git = 'all',
+            indent_markers = {
+                enable = true,
+            },
+            icons = {
+                show = {
+                    git = true,
+                    -- hidden = true,
+                }
+            }
+        }
+    },
+    init = function()
+        vim.api.nvim_create_autocmd("VimEnter", {
+            group = vim.api.nvim_create_augroup("Nvimtree_start_directory", { clear = true }),
+            desc = "Start Nvim-tree with directory",
+            once = true,
+            callback = function()
+                local api = require("nvim-tree.api")
+                local function opts(desc)
+                    return { desc = "nvim-tree: " .. desc, buffer = bufnr, noremap = true, silent = true, nowait = true }
+                end
+
+                vim.keymap.set('n', "_", api.tree.change_root_to_node, opts("CD"))
+                vim.keymap.set('n', " ", api.node.open.edit, opts("Open"))
+
+                if package.loaded["nvim-tree"] then
+                    return
+                else
+                    local stats = vim.uv.fs_stat(vim.fn.argv(0))
+                    if stats and stats.type == "directory" then
+                        require("nvim-tree")
+                    end
+                end
+            end,
+        })
+    end,
+    config = function(_, opts)
+        require("nvim-tree").setup(opts)
+    end,
+}
