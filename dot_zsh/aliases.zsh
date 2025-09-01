@@ -6,7 +6,7 @@ alias tf="tofu"
 alias ch="chezmoi"
 
 alias zp="cd ~/.zsh"
-alias vc="vim ~/.vimrc"
+alias vc="vim ~/.config/nvim/init.lua"
 alias pkey="cat ~/.ssh/id_ed25519.pub | pbcopy"
 alias tconf="tmuxconf"
 alias vp="cd ~/.config/nvim/lua/plugins"
