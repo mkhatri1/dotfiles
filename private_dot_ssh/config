@@ -1,5 +1,7 @@
 Include /Users/mkhatri/.colima/ssh_config
 
+Include ~/.ssh/config.d/*.conf
+
 ## DO NOT PUT SENSITIVE DATA IN THIS CONFIG.
 ## Include SEPARATE FILES
 
@@ -8,5 +10,4 @@ Host github.com
   UseKeychain yes
   IdentityFile ~/.ssh/id_ed25519
 
-Include config.d/*
 
