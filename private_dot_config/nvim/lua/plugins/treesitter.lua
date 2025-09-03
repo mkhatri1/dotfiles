@@ -18,7 +18,26 @@ return
         event = { "BufReadPost", "BufNewFile", "BufWritePre" },
         build = ":TSUpdate",
         dependencies = {
-            "windwp/nvim-ts-autotag",
+            {
+                "windwp/nvim-ts-autotag",
+                opts = {
+                    opts = {
+
+                        enable_close = true,
+                        enable_rename = true,
+                        enable_close_on_slash = false,
+                    },
+                    per_filetype = {
+                        ["jsx"] = {
+                            enable_close_on_slash = true
+                        },
+                        ["tsx"] = {
+                            enable_close_on_slash = true
+                        }
+                    }
+                },
+                config = true
+            }
         },
         init = function(plugin)
             require("lazy.core.loader").add_to_rtp(plugin)

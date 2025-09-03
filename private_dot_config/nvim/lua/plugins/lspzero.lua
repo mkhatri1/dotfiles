@@ -19,7 +19,7 @@ return {
                 dependencies = {
                     'rafamadriz/friendly-snippets',
                 },
-                init = function ()
+                init = function()
                     require("luasnip.loaders.from_vscode").lazy_load()
                 end
             },
@@ -121,6 +121,29 @@ return {
             servers = {
                 bashls = {
                     filetypes = { "sh", "zsh", "bash" }
+                },
+                lua_ls = {
+                    settings = {
+                        Lua = {
+                            runtime = {
+                                version = 'LuaJIT',
+                            },
+                            diagnostics = {
+                                -- Get the language server to recognize the `vim` global
+                                globals = {
+                                    'vim',
+                                    'require'
+                                },
+                            },
+                            workspace = {
+                                -- Make the server aware of Neovim runtime files
+                                library = vim.api.nvim_get_runtime_file("", true),
+                            },
+                            telemetry = {
+                                enable = false,
+                            },
+                        }
+                    }
                 }
             }
         },
@@ -197,7 +220,7 @@ return {
                     end,
                     astrolsp = function(server)
                         require('astrolsp').lsp_setup(server)
-                    end
+                    end,
                 }
             })
         end
