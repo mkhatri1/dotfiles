@@ -2,11 +2,11 @@
 -- remaps
 --
 
-local function map (mode, lhs, rhs)
+local function map(mode, lhs, rhs)
     vim.keymap.set(mode, lhs, rhs, { silent = true })
 end
 
-local function mapn (mode, lhs, rhs)
+local function mapn(mode, lhs, rhs)
     vim.keymap.set(mode, lhs, rhs, { silent = true, noremap = true })
 end
 
@@ -49,11 +49,10 @@ mapn('n', '<A-8>', '<Cmd>BufferGoto 8<CR>')
 mapn('n', '<A-9>', '<Cmd>BufferGoto 9<CR>')
 mapn('n', '<A-0>', '<Cmd>BufferLast<CR>')
 
-mapn('n', '<C-p>',   '<Cmd>BufferPick<CR>')
+mapn('n', '<C-p>', '<Cmd>BufferPick<CR>')
 
 -- Window Navigation
 map("n", "<C-h>", "<C-w>h")
 map("n", "<C-l>", "<C-w>l")
 map("n", "<C-k>", "<C-w>k")
 map("n", "<C-j>", "<C-w>j")
-

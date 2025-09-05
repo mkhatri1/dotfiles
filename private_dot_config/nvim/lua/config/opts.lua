@@ -1,6 +1,6 @@
 --
 -- opts
--- 
+--
 
 local o = vim.opt
 
@@ -37,3 +37,4 @@ o.ignorecase = true
 o.wrap = false
 o.backspace = { "start", "eol", "indent" }
 o.titlestring = 'Neovim: %{expand(\"%:p\")} [%{mode()}]'
+o.selection = 'exclusive'
