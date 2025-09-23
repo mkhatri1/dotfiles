@@ -144,6 +144,21 @@ return {
                             },
                         }
                     }
+                },
+                yamlls = {
+                    settings = {
+                        yaml = {
+                            schemas = {
+                                ['https://json.schemastore.org/github-workflow.json'] = '/.github/workflows/**/*.yaml'
+                            },
+                            schemaStore = {
+                                enable = true
+                            },
+                            format = {
+                                enable = true
+                            }
+                        }
+                    }
                 }
             }
         },

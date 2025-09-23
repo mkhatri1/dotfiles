@@ -5,7 +5,13 @@ export TERM=xterm-256color
 export SHELL="/bin/zsh"
 export EDITOR="nvim"
 export VISUAL="nvim"
+
 export XDG_CONFIG_HOME="$HOME/.config"
+export XDG_CONFIG_HOME="$HOME/.config"
+export XDG_DATA_HOME="$HOME/.local/share"
+export XDG_STATE_HOME="$HOME/.local/state"
+export XDG_CACHE_HOME="$HOME/.cache"
+
 export WORDCHARS=${WORDCHARS/\/}
 export WORDCHARS=${WORDCHARS/-}
 export WORDCHARS=${WORDCHARS/=}
@@ -26,6 +32,7 @@ if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]
 fi
 
 # Initialize completion functionality early so zinit can backtrack later
+{{ if eq .chezmoi.os "darwin" }}
 autoload -Uz +X compinit bashcompinit
 bashcompinit
 if [ $(date +'%j') != $(stat -f '%Sm' -t '%j' ~/.zcompdump) ]; then
@@ -33,7 +40,12 @@ if [ $(date +'%j') != $(stat -f '%Sm' -t '%j' ~/.zcompdump) ]; then
 else
   compinit -C
 fi
-#
+{{ else }}
+bashcompinit
+compinit
+{{ end }}
+
+
 ### Added by Zinit's installer
 if [[ ! -f $HOME/.local/share/zinit/zinit.git/zinit.zsh ]]; then
     print -P "%F{33} %F{220}Installing %F{33}ZDHARMA-CONTINUUM%F{220} Initiative Plugin Manager (%F{33}zdharma-continuum/zinit%F{220})…%f"
@@ -67,11 +79,11 @@ else
   export SHORT_HOST="${HOST/.*/}"
 fi
 
-#test -e "${HOME}/.iterm2_shell_integration.zsh" && source "${HOME}/.iterm2_shell_integration.zsh"
-#export ITERM_ENABLE_SHELL_INTEGRATION_WITH_TMUX=YES
-
 export PATH="$PATH:$HOME/.local/bin"
+
+{{ if eq .chezmoi.arch "arm64" }}
 export QEMU_SYSTEM_X86_64="qemu-system-x86_64 -cpu Haswell-v4"
+{{ end }}
 
 zinit ice depth=1
 zinit load mroth/evalcache
@@ -148,7 +160,13 @@ zinit ice lucid wait as="program" from="gh-r" mv="lazydocker* -> lazydocker" atl
 zinit light jesseduffield/lazydocker
 
 # FD - Better `find`
-zinit ice lucid wait as="program" from="gh-r" pick="**/fd" atload="alias find='fd'" bpick="*aarch64-apple-darwin*"
+zinit ice lucid wait as="program" from="gh-r" pick="**/fd" atload="alias find='fd'" bpick="*
+{{- if eq .chezmoi.arch "arm64" -}}
+aarch64
+{{- else -}}
+x86_64
+{{- end -}}
+-*-{{- .chezmoi.os -}}*"
 zinit light sharkdp/fd
 
 # ZSH Integration TMUX
@@ -160,7 +178,11 @@ zinit ice wait="2" lucid from="gh-r" as="program" sbin="**/lazygit" atload="alia
 zinit light jesseduffield/lazygit
 
 # Glow - MD Reader
-zinit wait lucid for from="gh-r" sbin="**/glow" charmbracelet/glow
+zinit wait lucid for from="gh-r" sbin="**/glow" atload="alias md='glow'" charmbracelet/glow
+
+# Sesh - Tmux Session Handler
+zinit ice wait="2" lucid from="gh-r" as="program" sbin="**/sesh"
+zinit light joshmedeski/sesh
 
 ## CORE PROGRAMS
 
