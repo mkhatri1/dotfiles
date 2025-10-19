@@ -10,12 +10,12 @@ local function mapn(mode, lhs, rhs)
     vim.keymap.set(mode, lhs, rhs, { silent = true, noremap = true })
 end
 
-vim.api.nvim_set_keymap("", ";", "<Nop>", { noremap = true, silent = true })
+-- vim.api.nvim_set_keymap("", ";", "<Nop>", { noremap = true, silent = true })
 
-map("", ";", "<Nop>")
+-- map("", ";", "<Nop>")
 
-vim.g.mapleader = ";"
-vim.g.maplocalleader = ";"
+vim.g.mapleader = " "
+vim.g.maplocalleader = " "
 
 map("n", "<leader>a", function() print "hi" end)
 
@@ -24,10 +24,10 @@ map("n", "<Leader>o", "<CMD>vsplit<CR>")
 -- lmap("n", "<Leader>p", "<CMD>split<CR>")
 
 -- Resize Windows
-map("n", "<C-S-Left>", "5<C-w>>")
-map("n", "<C-S-Right>", "5<C-w><")
-map("n", "<C-S-Up>", "<C-w>-")
-map("n", "<C-S-Down>", "<C-w>+")
+map("n", "<C-S-h>", "5<C-w>>")
+map("n", "<C-S-l>", "5<C-w><")
+map("n", "<C-S-k>", "<C-w>-")
+map("n", "<C-S-j>", "<C-w>+")
 
 -- Move to previous/next
 mapn('n', '<A-,>', '<Cmd>BufferPrevious<CR>')

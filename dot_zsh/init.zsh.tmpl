@@ -85,8 +85,13 @@ export PATH="$PATH:$HOME/.local/bin"
 export QEMU_SYSTEM_X86_64="qemu-system-x86_64 -cpu Haswell-v4"
 {{ end }}
 
+## Core 
+
 zinit ice depth=1
 zinit load mroth/evalcache
+
+zinit ice depth=1 atload='export ZVM_SYSTEM_CLIPBOARD_ENABLED=true'
+zinit light jeffreytse/zsh-vi-mode
 
 ## Autosuggestions / Format
 
@@ -213,6 +218,30 @@ zinit ice atclone'PYENV_ROOT="$PWD" ./libexec/pyenv init - > zpyenv.zsh' \
     as'command' pick'bin/pyenv' src"zpyenv.zsh" nocompile'!'
 zinit light pyenv/pyenv
 
+# UV (Python)
+zinit ice wait lucid from='gh-r' as='program' sbin='**/uv*' atload='_evalcache uv generate-shell-completion zsh' bpick="*
+{{- if eq .chezmoi.arch "arm64" -}}
+aarch64
+{{- else -}}
+x86_64
+{{- end -}}
+-*-{{- .chezmoi.os -}}*"
+zinit light astral-sh/uv
+
+zinit ice wait lucid from'gh-r' as'program' sbin'**/jira' bpick="*
+{{- if eq .chezmoi.os "darwin" -}}
+macOS
+{{- else -}}
+linux
+{{- end -}}*
+{{- if eq .chezmoi.arch "arm64" -}}
+arm64
+{{- else -}}
+x86_64
+{{- end -}}
+*"
+zinit light ankitpokhrel/jira-cli
+
 # TMUX
 zinit id-as for \
     cmake \
@@ -252,6 +281,9 @@ autoload -U up-line-or-beginning-search
 autoload -U down-line-or-beginning-search
 zle -N up-line-or-beginning-search
 zle -N down-line-or-beginning-search
+
+bindkey -v # Vim mode
+
 bindkey "^[[A" up-line-or-beginning-search # Up
 bindkey "^[[B" down-line-or-beginning-search # Down
 
