@@ -50,7 +50,7 @@ return
         opts = {
             highlight = {
                 enable = true,
-                additional_vim_regex_highlighting = false,
+                additional_vim_regex_highlighting = true,
             },
             indent = {
                 enable = true,
@@ -61,41 +61,44 @@ return
             autotag = {
                 enable = true,
             },
+            folds = {
+                enable = true
+            },
             ensure_installed = {
                 "bash",
                 "c",
+                "cmake",
                 "cpp",
                 "css",
+                "diff",
                 "dockerfile",
                 "gitignore",
                 "go",
                 "html",
+                "http",
                 "javascript",
-                "json",
-                "lua",
-                "markdown",
-                "markdown_inline",
-                "python",
-                "rust",
-                "tsx",
-                "typescript",
-                "vim",
-                "yaml",
-                "bash",
-                "diff",
                 "jsdoc",
+                "json",
                 "lua",
                 "luadoc",
                 "luap",
+                "markdown_inline",
+                "markdown",
+                "python",
                 "regex",
+                "rust",
                 "toml",
+                "tsx",
+                "typescript",
+                "vim",
                 "vimdoc",
+                "yaml",
             },
             incremental_selection = {
                 enable = true,
                 keymaps = {
-                    init_selection = "<C-,>",
-                    node_incremental = "<C-,>",
+                    init_selection = "<C-space>",
+                    node_incremental = "<C-space>",
                     scope_incremental = false,
                     node_decremental = "<bs>",
                 },
@@ -112,12 +115,31 @@ return
             },
         },
         config = function(_, opts)
-            local treesitter = require("nvim-treesitter.configs")
+            local treesitter = require("nvim-treesitter")
+
+            if vim.fn.executable("git") == 0 then opts.ensure_installed = nil end
 
             if type(opts.ensure_installed) == "table" then
                 opts.ensure_installed = dedup(opts.ensure_installed)
             end
+
             treesitter.setup(opts)
+
+            vim.api.nvim_create_autocmd("FileType", {
+                pattern = "*",
+                callback = function()
+                    local filetype = vim.bo.filetype
+                    if filetype and filetype ~= "" then
+                        pcall(vim.treesitter.start)
+                    end
+                end
+            })
+
+            vim.api.nvim_create_autocmd("FileType", {
+                callback = function()
+                    vim.bo.indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
+                end,
+            })
         end,
     },
     {

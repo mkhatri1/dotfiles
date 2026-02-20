@@ -163,12 +163,14 @@ return {
             }
         },
         config = function(_, opts)
-            local lspconfig = require('lspconfig')
-            local lsp_defaults = lspconfig.util.default_config
+            local default_capabilities = vim.lsp.protocol.make_client_capabilities()
 
             for server, config in pairs(opts.servers) do
                 config.capabilities = require('blink.cmp').get_lsp_capabilities(config.capabilities)
-                lspconfig[server].setup(config)
+                vim.lsp.enable(server)
+                if config then
+                    vim.lsp.config(server, config)
+                end
             end
 
             -- Add cmp_nvim_lsp capabilities settings to lspconfig
@@ -180,10 +182,10 @@ return {
             -- )
             --
 
-            lsp_defaults.capabilities = vim.tbl_deep_extend('force', lsp_defaults.capabilities,
+            default_capabilities = vim.tbl_deep_extend('force', default_capabilities,
                 require('blink.cmp').get_lsp_capabilities({}, false))
 
-            lsp_defaults.capabilities = vim.tbl_deep_extend('force', lsp_defaults.capabilities, {
+            default_capabilities = vim.tbl_deep_extend('force', default_capabilities, {
                 textDocument = {
                     foldingRange = {
                         dynamicRegistration = false,
@@ -207,7 +209,9 @@ return {
                     vim.keymap.set('n', 'gr', '<cmd>lua vim.lsp.buf.references()<cr>', opts)
                     vim.keymap.set('n', 'gs', '<cmd>lua vim.lsp.buf.signature_help()<cr>', opts)
                     vim.keymap.set('n', '<F2>', '<cmd>lua vim.lsp.buf.rename()<cr>', opts)
-                    vim.keymap.set({ 'n', 'x' }, 'fo', '<cmd>lua vim.lsp.buf.format({async = true})<cr>', opts)
+                    vim.keymap.set({ 'n', 'x' }, 'fo',
+                        '<cmd>lua vim.lsp.buf.format({async = true, filter = function(client) return client.name ~= "tsgo" end  })<cr>',
+                        opts)
                     vim.keymap.set('n', '<F4>', '<cmd>lua vim.lsp.buf.code_action()<cr>', opts)
                     vim.diagnostic.config({
                         virtual_text = true
@@ -220,16 +224,17 @@ return {
                 ensure_installed = {
                     'lua_ls',
                     'biome',
-                    'ts_ls'
+                    'tsgo'
                 },
                 handlers = {
                     -- this first function is the "default handler"
                     -- it applies to every language server without a "custom handler"
                     function(server_name)
-                        require('lspconfig')[server_name].setup({})
+                        vim.lsp.enable(server_name)
                     end,
                     bashls = function()
-                        require("lspconfig").bashls.setup({
+                        vim.lsp.enable('bashls')
+                        vim.lsp.config({
                             filetypes = { "sh", "zsh", "bash" }
                         })
                     end,
