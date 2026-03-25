@@ -1,4 +1,4 @@
-function dedup(list)
+local function dedup(list)
     local ret = {}
     local seen = {}
     for _, v in ipairs(list) do
@@ -10,60 +10,25 @@ function dedup(list)
     return ret
 end
 
+-- Languages where treesitter indentation is known to be problematic
+local indent_disabled = { "yaml" }
+
 return
 {
 
     {
         "nvim-treesitter/nvim-treesitter",
-        event = { "BufReadPost", "BufNewFile", "BufWritePre" },
+        branch = "main",
+        lazy = false,
         build = ":TSUpdate",
         dependencies = {
             {
                 "windwp/nvim-ts-autotag",
-                opts = {
-                    opts = {
-
-                        enable_close = true,
-                        enable_rename = true,
-                        enable_close_on_slash = false,
-                    },
-                    per_filetype = {
-                        ["jsx"] = {
-                            enable_close_on_slash = true
-                        },
-                        ["tsx"] = {
-                            enable_close_on_slash = true
-                        }
-                    }
-                },
-                config = true
+                opts = {},
             }
         },
-        init = function(plugin)
-            require("lazy.core.loader").add_to_rtp(plugin)
-        end,
-        cmd = { "TSUpdateSync", "TSUpdate", "TSInstall" },
-        keys = {
-            { "<C-Space>", desc = "Increment Selection" },
-            { "<bs>",      desc = "Decrement Selection", mode = "x" },
-        },
+        opts_extend = { "ensure_installed" },
         opts = {
-            highlight = {
-                enable = true,
-                additional_vim_regex_highlighting = true,
-            },
-            indent = {
-                enable = true,
-                disable = {
-                    'yaml'
-                }
-            },
-            autotag = {
-                enable = true,
-            },
-            folds = {
-                enable = true
-            },
             ensure_installed = {
                 "bash",
                 "c",
@@ -90,32 +55,16 @@ return
                 "toml",
                 "tsx",
                 "typescript",
+                "typespec",
                 "vim",
                 "vimdoc",
                 "yaml",
             },
-            incremental_selection = {
-                enable = true,
-                keymaps = {
-                    init_selection = "<C-space>",
-                    node_incremental = "<C-space>",
-                    scope_incremental = false,
-                    node_decremental = "<bs>",
-                },
-            },
-            rainbow = {
-                enable = true,
-                disable = { "html" },
-                extended_mode = true,
-                max_file_lines = nil,
-            },
-            context_commentstring = {
-                enable = true,
-                enable_autocmd = false,
-            },
+            sync_install = false,
+            auto_install = true,
         },
         config = function(_, opts)
-            local treesitter = require("nvim-treesitter")
+            local ts = require("nvim-treesitter")
 
             if vim.fn.executable("git") == 0 then opts.ensure_installed = nil end
 
@@ -123,22 +72,39 @@ return
                 opts.ensure_installed = dedup(opts.ensure_installed)
             end
 
-            treesitter.setup(opts)
+            ts.install(opts.ensure_installed)
+
+            local max_filesize = 200 * 1024 -- 200 KB
 
             vim.api.nvim_create_autocmd("FileType", {
                 pattern = "*",
-                callback = function()
-                    local filetype = vim.bo.filetype
-                    if filetype and filetype ~= "" then
-                        pcall(vim.treesitter.start)
-                    end
-                end
-            })
+                callback = function(args)
+                    local lang = vim.treesitter.language.get_lang(args.match)
+                    if not lang or lang == "" then return end
+                    if not vim.list_contains(ts.get_available(), lang) then return end
 
-            vim.api.nvim_create_autocmd("FileType", {
-                callback = function()
-                    vim.bo.indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
-                end,
+                    -- Install parser on demand if not yet installed
+                    if not vim.list_contains(ts.get_installed(), lang) then
+                        local install_ok = pcall(function() ts.install(lang):wait() end)
+                        if not install_ok then return end
+                    end
+
+                    local ok, stats = pcall(vim.loop.fs_stat, vim.api.nvim_buf_get_name(args.buf))
+                    if ok and stats and stats.size > max_filesize then
+                        vim.notify(
+                            "File larger than 200KB, treesitter disabled for performance",
+                            vim.log.levels.WARN,
+                            { title = "Treesitter" }
+                        )
+                        return
+                    end
+
+                    pcall(vim.treesitter.start, args.buf)
+
+                    -- if not vim.list_contains(indent_disabled, lang) then
+                    --     vim.bo[args.buf].indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
+                    -- end
+                end
             })
         end,
     },
