@@ -1,4 +1,16 @@
 return {
+    -- Neovim Lua type definitions (vim.uv, vim.api, etc.)
+    {
+        "folke/lazydev.nvim",
+        ft = "lua",
+        opts = {
+            library = {
+                -- Adds luv (libuv) types so vim.uv is recognised
+                { path = "${3rd}/luv/library", words = { "vim%.uv" } },
+            },
+        },
+    },
+
     {
         'mason-org/mason.nvim',
         build = ":MasonUpdate",
@@ -64,6 +76,7 @@ return {
             { 'mason-org/mason-lspconfig.nvim' },
             { 'saghen/blink.cmp' },
             { "b0o/schemastore.nvim",          lazy = false, config = false },
+            { "folke/lazydev.nvim" },
         },
         init = function()
             vim.opt.signcolumn = 'yes'
@@ -81,14 +94,9 @@ return {
                                 version = 'LuaJIT',
                             },
                             diagnostics = {
-                                globals = {
-                                    'vim',
-                                    'require'
-                                },
+                                globals = { 'vim', 'require' },
                             },
-                            workspace = {
-                                library = vim.api.nvim_get_runtime_file("", true),
-                            },
+                            -- lazydev.nvim injects the workspace library automatically
                             telemetry = {
                                 enable = false,
                             },
@@ -98,7 +106,6 @@ return {
                 yamlls = {
                     settings = {
                         yaml = {
-                            -- schemas = require('schemastore').yaml.schemas(),
                             schemaStore = {
                                 enable = false,
                                 url = ""
@@ -148,9 +155,6 @@ return {
                 vim.lsp.enable(server)
             end
 
-            -- Global diagnostic display settings (not per-buffer)
-            vim.diagnostic.config({ virtual_text = true })
-
             vim.api.nvim_create_autocmd('LspAttach', {
                 desc = 'LSP actions',
                 callback = function(event)
@@ -181,8 +185,6 @@ return {
                     'bashls'
                 },
                 handlers = {
-                    -- Default handler: enable any mason-installed server
-                    -- not already configured via opts.servers
                     function(server_name)
                         vim.lsp.enable(server_name)
                     end,
@@ -191,17 +193,6 @@ return {
         end
     },
 
-    {
-        'nvimdev/lspsaga.nvim',
-        event = 'LspAttach',
-        config = function()
-            require('lspsaga').setup({})
-        end,
-        dependencies = {
-            'nvim-treesitter/nvim-treesitter',
-            'nvim-tree/nvim-web-devicons',
-        }
-    },
     {
         'linux-cultist/venv-selector.nvim',
         branch = "main",

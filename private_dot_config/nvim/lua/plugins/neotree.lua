@@ -33,10 +33,9 @@ return {
         })
     end,
     config = function(_, opts)
-        vim.fn.sign_define("DiagnosticSignError", { text = " ", texthl = "DiagnosticSignError" })
-        vim.fn.sign_define("DiagnosticSignWarn", { text = " ", texthl = "DiagnosticSignWarn" })
-        vim.fn.sign_define("DiagnosticSignInfo", { text = " ", texthl = "DiagnosticSignInfo" })
-        vim.fn.sign_define("DiagnosticSignHint", { text = "󰌵", texthl = "DiagnosticSignHint" })
+        -- Diagnostic sign icons are configured globally in opts.lua via vim.diagnostic.config()
+
+        opts.enable_refresh_on_write = true
 
         opts.filesystem = {
             bind_to_cwd = false,
@@ -46,6 +45,9 @@ return {
                 hide_dotfiles = false,
                 hide_gitignored = false,
                 visible = true,
+                hide_by_name = {
+                    "node_modules"
+                },
             },
         }
 
@@ -74,6 +76,15 @@ return {
         }
 
         require('neo-tree').setup(opts)
+
+        -- Prevent `node_modules` from being followed in a goto-definition call. Prevents overload
+        local fs = require("neo-tree.sources.filesystem")
+        local orig_follow = fs.follow
+        fs.follow = function(callback, force_show)
+            if not vim.api.nvim_buf_get_name(0):find("node_modules", 1, true) then
+                orig_follow(callback, force_show)
+            end
+        end
 
         vim.api.nvim_create_autocmd("TermClose", {
             pattern = "*diffview",

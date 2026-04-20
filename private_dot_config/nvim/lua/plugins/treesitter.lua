@@ -89,21 +89,23 @@ return
                         if not install_ok then return end
                     end
 
-                    local ok, stats = pcall(vim.loop.fs_stat, vim.api.nvim_buf_get_name(args.buf))
+                    local ok, stats = pcall(vim.uv.fs_stat, vim.api.nvim_buf_get_name(args.buf))
                     if ok and stats and stats.size > max_filesize then
                         vim.notify(
                             "File larger than 200KB, treesitter disabled for performance",
                             vim.log.levels.WARN,
                             { title = "Treesitter" }
                         )
+                        -- Fall back to regex syntax highlighting for large files
+                        vim.bo[args.buf].syntax = "on"
                         return
                     end
 
-                    pcall(vim.treesitter.start, args.buf)
-
-                    -- if not vim.list_contains(indent_disabled, lang) then
-                    --     vim.bo[args.buf].indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
-                    -- end
+                    -- Start treesitter; fall back to regex syntax on failure
+                    local ts_ok = pcall(vim.treesitter.start, args.buf)
+                    if not ts_ok then
+                        vim.bo[args.buf].syntax = "on"
+                    end
                 end
             })
         end,
