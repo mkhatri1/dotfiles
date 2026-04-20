@@ -1,25 +1,30 @@
 # Init profiling
 zmodload zsh/zprof
 
+export DO_NOT_TRACK=1
+
 export TERM=xterm-256color
 export SHELL="/bin/zsh"
 export EDITOR="nvim"
 export VISUAL="nvim"
 
 export XDG_CONFIG_HOME="$HOME/.config"
-export XDG_CONFIG_HOME="$HOME/.config"
 export XDG_DATA_HOME="$HOME/.local/share"
 export XDG_STATE_HOME="$HOME/.local/state"
 export XDG_CACHE_HOME="$HOME/.cache"
+export FNM_DIR="$HOME/.local/share/fnm"
 
-export WORDCHARS=${WORDCHARS/\/}
-export WORDCHARS=${WORDCHARS/-}
-export WORDCHARS=${WORDCHARS/=}
+export WORDCHARS="${WORDCHARS//[\/=\-]}"
 
 zmodload -i zsh/complist
 zstyle ":completion:*" matcher-list 'm:{a-zA-Z}={A-Za-z}'
 # pasting with tabs doesn't perform completion
 zstyle ':completion:*' insert-tab pending
+
+{{ if eq .chezmoi.os "darwin" }}
+# Homebrew zsh completions (eza, etc.)
+fpath=(/opt/homebrew/share/zsh/site-functions $fpath)
+{{ end }}
 
 if [ -n "${GHOSTTY_RESOURCES_DIR}" ]; then
     builtin source "${GHOSTTY_RESOURCES_DIR}/shell-integration/zsh/ghostty-integration"
@@ -27,6 +32,7 @@ fi
 # Enable Powerlevel10k instant prompt. Should stay close to the top of ~/.zshrc.
 # Initialization code that may require console input (password prompts, [y/n]
 # confirmations, etc.) must go above this block; everything else may go below.
+typeset -g POWERLEVEL9K_INSTANT_PROMPT=quiet
 if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
   source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
 fi
@@ -63,10 +69,7 @@ autoload -Uz _zinit
 # Load a few important annexes, without Turbo
 # (this is currently required for annexes)
 zinit light-mode for \
-    zdharma-continuum/zinit-annex-as-monitor \
-    zdharma-continuum/zinit-annex-bin-gem-node \
-    zdharma-continuum/zinit-annex-patch-dl \
-    zdharma-continuum/zinit-annex-rust
+    zdharma-continuum/zinit-annex-bin-gem-node
 
 # Load P10K
 zinit ice depth=1; zinit light romkatv/powerlevel10k
@@ -79,42 +82,44 @@ else
   export SHORT_HOST="${HOST/.*/}"
 fi
 
-export PATH="$PATH:$HOME/.local/bin"
-
 {{ if eq .chezmoi.arch "arm64" }}
 export QEMU_SYSTEM_X86_64="qemu-system-x86_64 -cpu Haswell-v4"
 {{ end }}
 
 ## Core 
 
-zinit ice depth=1
+zinit ice depth=1 notrack
 zinit load mroth/evalcache
 
-zinit ice depth=1 atload='export ZVM_SYSTEM_CLIPBOARD_ENABLED=true'
+zinit ice lucid depth=1 notrack
+zinit light romkatv/zsh-defer
+
+zinit ice wait="0" lucid depth=1 notrack atload='export ZVM_SYSTEM_CLIPBOARD_ENABLED=true'
 zinit light jeffreytse/zsh-vi-mode
 
 ## Autosuggestions / Format
 
 ZSH_AUTOSUGGEST_BUFFER_MAX_SIZE=20
-zinit ice wait="0a" lucid atload="_zsh_autosuggest_start"
+ZSH_AUTOSUGGEST_IGNORE_WIDGETS=(
+  ${ZSH_AUTOSUGGEST_IGNORE_WIDGETS[@]}
+  zle-\*
+  bracketed-paste
+)
+zinit ice wait="0a" lucid notrack atload="_zsh_autosuggest_start"
 zinit light zsh-users/zsh-autosuggestions
 
 # Zoxide (Improved CD with fuzzy finder)
 zinit ice wait="0" lucid from="gh-r" as="program" pick="zoxide-*/zoxide -> zoxide" cp="zoxide-*/completions/_zoxide -> _zoxide" atclone="./zoxide init --cmd cd zsh > init.zsh" atpull="%atclone" src="init.zsh"
 zinit light ajeetdsouza/zoxide
 
-# Tree-Sitter
-zinit ice as="program" from="gh-r" mv="tree* -> tree-sitter" pick="tree-sitter"
-zinit light tree-sitter/tree-sitter
-
 # Syntax Highlighting
-zinit ice wait"0c" lucid atinit="zicompinit; zicdreplay" src"zsh-syntax-highlighting.zsh"
+zinit ice wait"0c" lucid notrack atinit="zicompinit; zicdreplay" src"zsh-syntax-highlighting.zsh"
 zinit light zsh-users/zsh-syntax-highlighting
 
 ## UTILITY PROGRAMS
 
 # FZF
-zinit ice from="gh-r" as="command"
+zinit ice from="gh-r" as="command" bpick="*{{- .chezmoi.os -}}_{{- if eq .chezmoi.arch "arm64" -}}arm64{{- else -}}amd64{{- end -}}*"
 zinit light junegunn/fzf
 # FZF BYNARY AND TMUX HELPER SCRIPT
 zinit ice lucid wait'0c' as="command" id-as="junegunn/fzf-tmux" pick="bin/fzf-tmux"
@@ -123,26 +128,39 @@ zinit light junegunn/fzf
 zinit ice lucid wait'0c' multisrc"shell/{completion,key-bindings}.zsh" id-as="junegunn/fzf_completions" pick="/dev/null"
 zinit light junegunn/fzf
 # FZF-TAB
-zinit ice wait="1" lucid
+zinit ice wait="1" lucid notrack
 zinit light Aloxaf/fzf-tab
 zstyle ':completion:*:git-checkout:*' sort false
 # set descriptions format to enable group support
 zstyle ':completion:*:descriptions' format '[%d]'
 # set list-colors to enable filename colorizing
 zstyle ':completion:*' list-colors ${(s.:.)LS_COLORS}
-# preview directory's content with exa when completing cd
-zstyle ':fzf-tab:complete:cd:*' fzf-preview 'exa -1 --color=always $realpath'
+# preview directory's content with eza when completing cd
+zstyle ':fzf-tab:complete:cd:*' fzf-preview 'eza -1 --color=always $realpath'
 # switch group using `,` and `.`
 zstyle ':fzf-tab:*' switch-group ',' '.'
 
 # PRETTYPING
-zinit ice lucid wait="" as="program" pick="prettyping" atload="alias ping=prettyping"
-zinit load denilsonsa/prettyping
+zinit ice lucid wait="0" as="program" pick="prettyping" atload="alias ping=prettyping"
+zinit light denilsonsa/prettyping
 
 # EZA (Improved LS with formatting)
 export EZA_COLORS="di=36;1:uu=2;33:da=94"
-zinit ice wait="2" lucid from="gh-r" as="program" mv="bin/eza* -> eza" atload="alias ls='eza --git  --classify --group-directories-first --time-style=long-iso --group --color-scale'"
+{{ if ne .chezmoi.os "darwin" }}
+# EZA - Linux only; macOS ships no gh-r binary, use Homebrew instead
+zinit ice lucid notrack from="gh-r" as="program" bpick="*{{- if eq .chezmoi.arch "arm64" -}}
+aarch64
+{{- else -}}
+x86_64
+{{- end -}}
+*linux*"
 zinit light eza-community/eza
+# EZA completions
+zinit ice wait lucid notrack id-as="eza-community/eza-completions" from="gh-r" \
+  bpick="completions*" atclone="tar xzf completions*.tar.gz" atpull="%atclone" \
+  as="completion" pick="completions/zsh/_eza"
+zinit light eza-community/eza
+{{ end }}
 
 # Delta
 zinit ice lucid wait="0" as="program" from="gh-r" pick="delta*/delta"
@@ -153,8 +171,12 @@ zinit ice lucid wait="0" as="program" from="gh-r" atload="alias df=duf"
 zinit light muesli/duf
 
 # RIPGREP
-zinit ice from="gh-r" as="program" mv="ripgrep* -> ripgrep" pick="ripgrep/rg"
+zinit ice wait lucid from="gh-r" as="program" mv="ripgrep* -> ripgrep" pick="ripgrep/rg"
 zinit light BurntSushi/ripgrep
+
+# AST-GREP
+zinit ice wait lucid from="gh-r" as="program" mv="sg* -> sg"
+zinit light ast-grep/ast-grep
 
 # JQ
 zinit ice lucid from="gh-r" nocompile sbin="* -> jq"
@@ -189,6 +211,21 @@ zinit wait lucid for from="gh-r" sbin="**/glow" atload="alias md='glow'" charmbr
 zinit ice wait="2" lucid from="gh-r" as="program" sbin="**/sesh"
 zinit light joshmedeski/sesh
 
+# Tealdeer - Shorter versions of `man` pages
+zinit ice wait lucid from='gh-r' as='program' mv="tealdeer* -> tldr" atload='alias mans=tldr' pick="*
+{{- if eq .chezmoi.arch "arm64" -}}
+aarch64
+{{- else -}}
+x86_64
+{{- end -}}
+-*-{{- .chezmoi.os -}}*"
+zinit light tealdeer-rs/tealdeer
+
+export TEALDEER_CONFIG_DIR="$XDG_CONFIG_HOME/tealdeer"
+
+zinit ice wait lucid from="gh-r" as='completion'
+zinit light tealdeer-rs/tealdeer
+
 ## CORE PROGRAMS
 
 # NEOVIM
@@ -199,21 +236,23 @@ zinit light neovim/neovim
 zinit ice lucid wait="0" as="program" from="gh-r" pick="gh*/bin/gh"
 zinit light cli/cli
 
-# NVM 
-export NVM_LAZY_LOAD=true
-export NVM_COMPLETION=true
-export NVM_AUTO_USE=true
-export NVM_COMPLETION=true
-export NVM_SYMLINK_CURRENT="true"
+# FNM (Node Version Manager - replaces NVM)
+zinit ice wait="0" lucid from="gh-r" as="program" sbin="fnm" notrack \
+  atload='_evalcache fnm env --use-on-cd --shell zsh' bpick="fnm-{{- if eq .chezmoi.os "darwin" -}}
+macos
+{{- else if eq .chezmoi.arch "arm64" -}}
+arm64-linux
+{{- else -}}
+linux
+{{- end -}}
+*"
+zinit light Schniz/fnm
 
-zinit ice wait lucid depth"1"
-zinit load lukechilds/zsh-nvm
-
-alias node='unalias node ; unalias npm ; nvm use default ; node $@'
-alias npm='unalias node ; unalias npm ; nvm use default ; npm $@'
+zinit ice atload"zpcdreplay" atclone"./zplug.zsh" atpull"%atclone"
+zinit light g-plane/pnpm-shell-completion
 
 # PyEnv
-zinit ice atclone'PYENV_ROOT="$PWD" ./libexec/pyenv init - > zpyenv.zsh' \
+zinit ice wait lucid atclone'PYENV_ROOT="$PWD" ./libexec/pyenv init - > zpyenv.zsh' \
     atinit'export PYENV_ROOT="$PWD"' atpull"%atclone" \
     as'command' pick'bin/pyenv' src"zpyenv.zsh" nocompile'!'
 zinit light pyenv/pyenv
@@ -251,11 +290,11 @@ zinit id-as for \
 
 ## Complete Initialization
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
-typeset -g POWERLEVEL9K_INSTANT_PROMPT=quiet
 
 ## History configuration
 SAVEHIST=1000000
 HISTSIZE=1000000
+export HISTFILE="$XDG_DATA_HOME/zsh/history"
 
 ## ZSH opt configuration
 setopt BANG_HIST                 # Treat the '!' character specially during expansion.
@@ -282,10 +321,9 @@ autoload -U down-line-or-beginning-search
 zle -N up-line-or-beginning-search
 zle -N down-line-or-beginning-search
 
-bindkey -v # Vim mode
-
-bindkey "^[[A" up-line-or-beginning-search # Up
-bindkey "^[[B" down-line-or-beginning-search # Down
+zmodload zsh/terminfo
+bindkey "${terminfo[kcuu1]}" up-line-or-beginning-search # Up
+bindkey "${terminfo[kcud1]}" down-line-or-beginning-search # Down
 
 bindkey "\ef" forward-word
 bindkey "\eb" backward-word
@@ -295,6 +333,6 @@ bindkey "^[d" kill-word
 bindkey "^[^H" backward-kill-word
 bindkey "^[^?" backward-kill-word
 
-_evalcache pulumi gen-completion zsh
-_evalcache op completion zsh
+zsh-defer _evalcache pulumi gen-completion zsh
+zsh-defer _evalcache op completion zsh
 
