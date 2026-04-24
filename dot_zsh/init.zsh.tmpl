@@ -97,7 +97,12 @@ zinit light romkatv/zsh-defer
 zinit ice wait="0" lucid depth=1 notrack atload='export ZVM_SYSTEM_CLIPBOARD_ENABLED=true'
 zinit light jeffreytse/zsh-vi-mode
 
-## Autosuggestions / Format
+
+# Zoxide (Improved CD with fuzzy finder)
+zinit ice wait="0" lucid from="gh-r" as="program" pick="zoxide-*/zoxide -> zoxide" cp="zoxide-*/completions/_zoxide -> _zoxide" atclone="./zoxide init --cmd cd zsh > init.zsh" atpull="%atclone" src="init.zsh"
+zinit light ajeetdsouza/zoxide
+
+## Autosuggestions / Format / Syntax Highlighting
 
 ZSH_AUTOSUGGEST_BUFFER_MAX_SIZE=20
 ZSH_AUTOSUGGEST_IGNORE_WIDGETS=(
@@ -105,16 +110,14 @@ ZSH_AUTOSUGGEST_IGNORE_WIDGETS=(
   zle-\*
   bracketed-paste
 )
-zinit ice wait="0a" lucid notrack atload="_zsh_autosuggest_start"
-zinit light zsh-users/zsh-autosuggestions
 
-# Zoxide (Improved CD with fuzzy finder)
-zinit ice wait="0" lucid from="gh-r" as="program" pick="zoxide-*/zoxide -> zoxide" cp="zoxide-*/completions/_zoxide -> _zoxide" atclone="./zoxide init --cmd cd zsh > init.zsh" atpull="%atclone" src="init.zsh"
-zinit light ajeetdsouza/zoxide
-
-# Syntax Highlighting
-zinit ice wait"0c" lucid notrack atinit="zicompinit; zicdreplay" src"zsh-syntax-highlighting.zsh"
-zinit light zsh-users/zsh-syntax-highlighting
+zinit wait"0c" lucid for \
+ atinit"ZINIT[COMPINIT_OPTS]=-C; zicompinit; zicdreplay" \
+    zdharma-continuum/fast-syntax-highlighting \
+ blockf \
+    zsh-users/zsh-completions \
+ atload"!_zsh_autosuggest_start" \
+    zsh-users/zsh-autosuggestions
 
 ## UTILITY PROGRAMS
 
@@ -222,9 +225,23 @@ x86_64
 zinit light tealdeer-rs/tealdeer
 
 export TEALDEER_CONFIG_DIR="$XDG_CONFIG_HOME/tealdeer"
-
 zinit ice wait lucid from="gh-r" as='completion'
 zinit light tealdeer-rs/tealdeer
+
+# Pet - Save snippets
+zinit ice wait lucid from="gh-r" as="program" pick="**/pet" 
+zinit light knqyf263/pet
+
+# Rclone
+zinit ice wait="3" lucid from="gh-r" as="program" sbin="**/rclone" atclone='**/rclone completion zsh ~/.local/share/rclone-completions' notrack bpick="rclone-*{{- if eq .chezmoi.os "darwin" -}}
+osx
+{{- else if eq .chezmoi.arch "arm64" -}}
+arm64
+{{- else -}}
+amd64
+{{- end -}}
+*"
+zinit light rclone/rclone
 
 ## CORE PROGRAMS
 
@@ -335,4 +352,5 @@ bindkey "^[^?" backward-kill-word
 
 zsh-defer _evalcache pulumi gen-completion zsh
 zsh-defer _evalcache op completion zsh
-
+zsh-defer _evalcache pet completion zsh
+zsh-defer _evalcache cat ~/.local/share/rclone-completions
