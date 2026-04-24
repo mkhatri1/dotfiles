@@ -1,0 +1,6 @@
+
+[[Snippets]]
+  Description = "Ensure the destination has all the files from the source. Runs in parallel and copies over metadata & timestamps."
+  Output = ""
+  Tag = ["sync"]
+  command = "rclone sync --multi-thread-streams=32 --transfers 32 --checkers 16 --tpslimit 12 --fast-list --metadata -P -L <source> <dest>"
